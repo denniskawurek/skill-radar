@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <meta name="description" content="Skill Radar: a tool to visualize technology skills through four categories.">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type="text/css">
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+    <script src="d3.js"></script>
+    <script src="radar.js"></script>
+</head>
+
+<body>
+    <div>
+        <svg id="radar"></svg>
+    </div>
+    <div>
+        <h1>What is the Skill Radar?</h1>
+        <p>
+            The skill radar gives you an overview of technologies I am using.<br />
+            The skills are separated into four categories. Each technology is assigned to a ring showing you how much
+            experience I have.<br />
+            The four rings have the following meaning:
+        </p>
+        <ul>
+            <li><strong>INTERESTED</strong> &mdash; Technologies I'm interested in, have read articles about, following
+                the development and had the first tries with simple use cases. But not used in production or
+                professional context, yet.</li>
+            <li><strong>ADOPTING</strong> &mdash; Technologies that I'm already using in my day-to-day developer life
+                either in professional or personal context. Also: knowledge of how it works, for what it is for and
+                knowing when it is best used. But not a whole overview of edge cases, failures or interfaces, yet.</li>
+            <li><strong>PROFOUND</strong> &mdash; Technologies I'm confident to use, have already gathered a lot of
+                experience in production and large scale. Edge cases, tests, deployment and running of it with the
+                knowledge what can happen and what is (not) possible with it.</li>
+            <li><strong>SPECIAL</strong> &mdash; Technologies where I have a <em>very</em> deep insight into with all
+                (dis)advantages through their professional usage</li>
+        </ul>
+        <p>
+            Based on <a href="https://github.com/dprgarner/tech-radar-generator#readme">Zalando Tech Radar Generator</a>
+            and <a href="https://d3js.org/">D3.js</a>
+        </p>
+        <p>
+            <strong>Build your own skill radar!</strong> <a href="">See blog entry.</a>
+        </p>
+        <p>
+            <small>Last revision: 2022-11-21</small>
+        </p>
+    </div>
+    <script>
+
+        class Entry {
+
+            static init() {
+                // default is: not moved, active
+                return new Entry().notMoved().isActive(true);
+            }
+
+            withLabel(label) {
+                this.label = label;
+                return this;
+            }
+
+            /**
+             * Ring to which this entry belongs.
+             * 0,1,2,3 (starting from inside)
+             */
+            inRing(index) {
+                this.ring = index;
+                return this;
+            }
+
+            /**
+             * Quadrant to which this entry belongs.
+             * 0,1,2,3 (counting clockwise, starting from bottom right)
+             */
+            inQuadrant(index) {
+                this.quadrant = index;
+                return this;
+            }
+
+            notMoved() {
+                this.moved = 0;
+                return this;
+            }
+
+            moveIn() {
+                this.moved = 1;
+                return this;
+            }
+
+            moveOut() {
+                this.moved = -1;
+                return this;
+            }
+
+            withLink(link) {
+                this.link = link;
+                return this;
+            }
+
+            isActive(active) {
+                this.active = active;
+                return this;
+            }
+
+            asJSON() {
+                return {
+                    label: this.label,
+                    moved: this.moved,
+                    quadrant: this.quadrant,
+                    ring: this.ring,
+                    active: this.active,
+                    link: this.link
+                }
+            }
+        }
+    </script>
+    <script>
+        let title = "Skill radar by Bob";
+        let width = 1450;
+        let height = 1000;
+        let svg_id = "radar";
+        let print_layout = true;
+
+        let colors = {
+            background: "#fff",
+            grid: "#bbb",
+            inactive: "#ddd"
+        };
+
+        const LANGUAGES_FRAMEWORKS = { name: "Languages & Frameworks", index: 0 }
+        const PLATFORMS = { name: "Platforms/Infrastructure", index: 1 }
+        const TOOLS = { name: "Tools", index: 2 }
+        const TECHNIQUES = { name: "Techniques", index: 3 }
+
+        let quadrants = [];
+        quadrants[LANGUAGES_FRAMEWORKS.index] = LANGUAGES_FRAMEWORKS;
+        quadrants[PLATFORMS.index] = PLATFORMS;
+        quadrants[TOOLS.index] = TOOLS;
+        quadrants[TECHNIQUES.index] = TECHNIQUES;
+
+        const SPECIAL = { name: "SPECIAL", color: "#93c47d", index: 0 };
+        const PROFOUND = { name: "PROFOUND", color: "#b7e1cd", index: 1 };
+        const ADOPTING = { name: "ADOPTING", color: "#fce8b2", index: 2 };
+        const INTERESTED = { name: "INTERESTED", color: "#f4c7c3", index: 3 };
+
+        let rings = [];
+        rings[SPECIAL.index] = SPECIAL;
+        rings[PROFOUND.index] = PROFOUND;
+        rings[ADOPTING.index] = ADOPTING;
+        rings[INTERESTED.index] = INTERESTED;
+
+        let entries = []
+        // Add your entries here, for example:
+        entries.push(Entry.init().withLabel("Kibana").inQuadrant(TOOLS.index).inRing(PROFOUND.index).asJSON());
+
+        radar_visualization({
+            svg_id,
+            width,
+            height,
+            colors,
+            title,
+            quadrants,
+            rings,
+            print_layout,
+            entries
+        });
+    </script>
+</body>
+
+</html>
